@@ -157,13 +157,13 @@ export default function Product() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="/mood-tracker"
-              className="bg-[#D4A574] text-white px-10 py-4 rounded-full text-lg font-semibold hover:bg-[#C9A876] transition-colors shadow-lg"
+              className="bg-gradient-to-r from-[#D4A574] to-[#C9A876] text-white px-12 py-5 rounded-full text-lg font-semibold hover:from-[#C9A876] hover:to-[#D4A574] transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
             >
               Start Tracking
             </Link>
             <Link
               href="/journal"
-              className="bg-[#E8D5B7] text-[#8B6F47] px-10 py-4 rounded-full text-lg font-semibold hover:bg-[#D4A574] hover:text-white transition-colors border-2 border-[#D4A574]"
+              className="bg-[#E8D5B7] text-[#8B6F47] px-12 py-5 rounded-full text-lg font-semibold hover:bg-gradient-to-r hover:from-[#D4A574] hover:to-[#C9A876] hover:text-white transition-all duration-300 border-2 border-[#D4A574] shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               Begin Journaling
             </Link>
@@ -175,40 +175,40 @@ export default function Product() {
       <div className="max-w-6xl mx-auto px-6 pb-16 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Quick Access Card */}
-          <div className="bg-[#F5E6D3] rounded-3xl p-8 border border-[#D4A574] text-center hover:shadow-lg transition-all duration-300">
-            <div className="w-16 h-16 bg-[#E8D5B7] rounded-full mx-auto mb-4 flex items-center justify-center">
-              <svg className="w-8 h-8 text-[#8B6F47]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-gradient-to-br from-[#F5E6D3] to-[#E8D5B7] rounded-3xl p-8 border-2 border-[#D4A574] text-center shadow-lg">
+            <div className="w-20 h-20 bg-gradient-to-br from-[#E8D5B7] to-[#D4A574] rounded-full mx-auto mb-5 flex items-center justify-center shadow-md">
+              <svg className="w-10 h-10 text-[#8B6F47]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-[#8B6F47] mb-3">Quick & Easy</h3>
-            <p className="text-[#8B6F47]">
+            <h3 className="text-2xl font-bold text-[#8B6F47] mb-4">Quick & Easy</h3>
+            <p className="text-[#8B6F47] text-base leading-relaxed">
               Log your mood in seconds. No complicated setup, just simple tracking that fits into your day.
             </p>
           </div>
 
           {/* Visual Growth Card */}
-          <div className="bg-[#F5E6D3] rounded-3xl p-8 border border-[#D4A574] text-center hover:shadow-lg transition-all duration-300">
-            <div className="w-16 h-16 bg-[#D4A574] rounded-full mx-auto mb-4 flex items-center justify-center">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-gradient-to-br from-[#F5E6D3] to-[#E8D5B7] rounded-3xl p-8 border-2 border-[#D4A574] text-center shadow-lg">
+            <div className="w-20 h-20 bg-gradient-to-br from-[#D4A574] to-[#C9A876] rounded-full mx-auto mb-5 flex items-center justify-center shadow-md">
+              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-[#8B6F47] mb-3">Watch Yourself Grow</h3>
-            <p className="text-[#8B6F47]">
+            <h3 className="text-2xl font-bold text-[#8B6F47] mb-4">Watch Yourself Grow</h3>
+            <p className="text-[#8B6F47] text-base leading-relaxed">
               See your wellness plant flourish as you track your mood. A beautiful visual of your progress.
             </p>
           </div>
 
           {/* AI Insights Card */}
-          <div className="bg-[#F5E6D3] rounded-3xl p-8 border border-[#D4A574] text-center hover:shadow-lg transition-all duration-300">
-            <div className="w-16 h-16 bg-[#E8D5B7] rounded-full mx-auto mb-4 flex items-center justify-center">
-              <svg className="w-8 h-8 text-[#8B6F47]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-gradient-to-br from-[#F5E6D3] to-[#E8D5B7] rounded-3xl p-8 border-2 border-[#D4A574] text-center shadow-lg">
+            <div className="w-20 h-20 bg-gradient-to-br from-[#E8D5B7] to-[#D4A574] rounded-full mx-auto mb-5 flex items-center justify-center shadow-md">
+              <svg className="w-10 h-10 text-[#8B6F47]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-[#8B6F47] mb-3">Smart Insights</h3>
-            <p className="text-[#8B6F47]">
+            <h3 className="text-2xl font-bold text-[#8B6F47] mb-4">Smart Insights</h3>
+            <p className="text-[#8B6F47] text-base leading-relaxed">
               Get AI-powered analysis of your journal entries to understand patterns and improve your wellness.
             </p>
           </div>

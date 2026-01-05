@@ -47,6 +47,22 @@ export default function MoodTracker() {
         <div className="bubble bubble-8"></div>
       </div>
 
+      {/* Foliage Decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-40 right-16 opacity-20">
+          <svg width="80" height="110" viewBox="0 0 80 110" fill="none">
+            <path d="M40 110 Q28 88 22 72 Q16 56 19 44 Q22 32 29 26 Q36 20 43 23 Q50 26 54 36 Q58 46 53 58 Q48 70 40 76" stroke="#6B8E23" strokeWidth="2" fill="none" strokeLinecap="round"/>
+            <ellipse cx="33" cy="50" rx="7" ry="11" fill="#7CB342" transform="rotate(-20 33 50)" opacity="0.5"/>
+          </svg>
+        </div>
+        <div className="absolute bottom-32 left-12 opacity-20">
+          <svg width="75" height="105" viewBox="0 0 75 105" fill="none">
+            <path d="M37 105 Q26 85 20 70 Q14 55 17 43 Q20 31 26 25 Q32 19 38 22 Q44 25 48 34 Q52 43 48 54 Q44 65 37 71" stroke="#6B8E23" strokeWidth="2" fill="none" strokeLinecap="round"/>
+            <ellipse cx="31" cy="48" rx="6" ry="10" fill="#8BC34A" transform="rotate(-18 31 48)" opacity="0.5"/>
+          </svg>
+        </div>
+      </div>
+
       {/* Navigation Bar */}
       <nav className="bg-[#F5E6D3] border-b border-[#D4A574] relative z-10">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
@@ -74,7 +90,7 @@ export default function MoodTracker() {
       <div className="max-w-7xl mx-auto px-6 py-6 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Plant Visualization */}
-          <div className="bg-[#F5E6D3] rounded-3xl p-6 border border-[#D4A574] flex flex-col relative">
+          <div className="bg-gradient-to-br from-[#F5E6D3] to-[#E8D5B7] rounded-3xl p-6 border-2 border-[#D4A574] flex flex-col relative shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-[#8B6F47] text-center flex-1">Your Wellness Plant</h2>
               {entries.length > 0 && (
@@ -263,7 +279,7 @@ export default function MoodTracker() {
                 )}
                 <Link
                   href="/journal"
-                  className="inline-block mt-4 bg-[#D4A574] text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-[#C9A876] transition-colors"
+                  className="inline-block mt-4 bg-gradient-to-r from-[#D4A574] to-[#C9A876] text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:from-[#C9A876] hover:to-[#D4A574] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
                 >
                   Go to Journal
                 </Link>
@@ -272,7 +288,7 @@ export default function MoodTracker() {
           </div>
 
           {/* Mood Entry Form */}
-          <div className="bg-[#F5E6D3] rounded-3xl p-6 border border-[#D4A574] flex flex-col">
+          <div className="bg-gradient-to-br from-[#F5E6D3] to-[#E8D5B7] rounded-3xl p-6 border-2 border-[#D4A574] flex flex-col shadow-lg">
             <h2 className="text-xl font-bold text-[#8B6F47] mb-4">Log Your Mood</h2>
             
             <form onSubmit={handleSubmit} className="space-y-4 flex-1 flex flex-col">
@@ -311,7 +327,7 @@ export default function MoodTracker() {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-[#D4A574] text-white px-6 py-2.5 rounded-full font-semibold hover:bg-[#C9A876] transition-colors text-sm"
+                className="w-full bg-gradient-to-r from-[#D4A574] to-[#C9A876] text-white px-6 py-3 rounded-full font-semibold hover:from-[#C9A876] hover:to-[#D4A574] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.02] text-sm"
               >
                 Save Entry
               </button>
@@ -323,7 +339,7 @@ export default function MoodTracker() {
                 <h3 className="text-lg font-bold text-[#8B6F47] mb-3">Recent Entries</h3>
                 <div className="space-y-2 max-h-32 overflow-y-auto">
                   {entries.slice().reverse().slice(0, 3).map((entry, index) => (
-                    <div key={index} className="bg-[#F9F5F0] rounded-lg p-3 border border-[#D4A574]">
+                    <div key={index} className="bg-[#F9F5F0] rounded-xl p-3 border-2 border-[#D4A574] shadow-sm">
                       <div className="flex justify-between items-center mb-1">
                         <span className="text-xs text-[#8B6F47] font-semibold">{entry.date}</span>
                         <span className="text-xs text-[#8B6F47]">Mood: {entry.mood}/10</span>

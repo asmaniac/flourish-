@@ -22,6 +22,8 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-nunito), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Floating Bubbles Animation */
@@ -197,6 +199,54 @@ body {
 }
 
 .card-hover:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 10px 25px rgba(139, 111, 71, 0.2);
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 15px 35px rgba(139, 111, 71, 0.25);
+}
+
+/* Smooth transitions for all interactive elements */
+button, a {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced button hover effects */
+button:hover, a:hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced smooth transitions */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Better focus states */
+*:focus-visible {
+  outline: 2px solid #D4A574;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Enhanced shadows utility classes */
+.shadow-soft {
+  box-shadow: 0 2px 8px rgba(139, 111, 71, 0.08), 0 1px 3px rgba(139, 111, 71, 0.12);
+}
+
+.shadow-medium {
+  box-shadow: 0 4px 16px rgba(139, 111, 71, 0.12), 0 2px 6px rgba(139, 111, 71, 0.16);
+}
+
+.shadow-strong {
+  box-shadow: 0 8px 24px rgba(139, 111, 71, 0.16), 0 4px 8px rgba(139, 111, 71, 0.2);
+}
+
+/* Font smoothing */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
