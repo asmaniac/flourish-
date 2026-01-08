@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db/prisma";
 // PUT - Update a journal entry
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -17,6 +17,7 @@ export async function PUT(
       );
     }
 
+    const { id: entryId } = await params;
     const body = await request.json();
     const { content } = body;
 
@@ -29,7 +30,7 @@ export async function PUT(
 
     // Verify the entry belongs to the user
     const existingEntry = await prisma.journalEntry.findUnique({
-      where: { id: params.id },
+      where: { id: entryId },
     });
 
     if (!existingEntry) {
@@ -47,7 +48,7 @@ export async function PUT(
     }
 
     const entry = await prisma.journalEntry.update({
-      where: { id: params.id },
+      where: { id: entryId },
       data: {
         content: content.trim(),
       },
@@ -66,7 +67,7 @@ export async function PUT(
 // DELETE - Delete a journal entry
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -78,9 +79,11 @@ export async function DELETE(
       );
     }
 
+    const { id: entryId } = await params;
+
     // Verify the entry belongs to the user
     const existingEntry = await prisma.journalEntry.findUnique({
-      where: { id: params.id },
+      where: { id: entryId },
     });
 
     if (!existingEntry) {
@@ -98,7 +101,7 @@ export async function DELETE(
     }
 
     await prisma.journalEntry.delete({
-      where: { id: params.id },
+      where: { id: entryId },
     });
 
     return NextResponse.json({ success: true });

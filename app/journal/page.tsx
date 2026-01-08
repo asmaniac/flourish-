@@ -5,9 +5,18 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Nav } from "@/components/nav";
 
+interface AnalysisResult {
+  summary: string;
+  patterns: string[];
+  triggers: string[];
+  insights: string[];
+  recommendations: string[];
+}
+
 interface JournalEntry {
   id: string;
   content: string;
+  aiAnalysis?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -21,6 +30,8 @@ export default function Journal() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [analyzingId, setAnalyzingId] = useState<string | null>(null);
+  const [analyses, setAnalyses] = useState<Record<string, AnalysisResult>>({});
 
   // Redirect if not logged in
   useEffect(() => {
@@ -118,10 +129,62 @@ export default function Journal() {
       }
 
       setEntries(entries.filter(entry => entry.id !== id));
+      // Remove analysis if it exists
+      const newAnalyses = { ...analyses };
+      delete newAnalyses[id];
+      setAnalyses(newAnalyses);
     } catch (err: any) {
       setError(err.message || "Failed to delete entry");
     }
   };
+
+  const handleAnalyze = async (entryId: string) => {
+    setAnalyzingId(entryId);
+    setError("");
+
+    try {
+      const response = await fetch(`/api/journal/${entryId}/analyze`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to analyze entry");
+      }
+
+      const data = await response.json();
+      setAnalyses({
+        ...analyses,
+        [entryId]: data.analysis,
+      });
+
+      // Update the entry in the list to mark it as analyzed
+      setEntries(entries.map(entry => 
+        entry.id === entryId 
+          ? { ...entry, aiAnalysis: JSON.stringify(data.analysis) }
+          : entry
+      ));
+    } catch (err: any) {
+      setError(err.message || "Failed to analyze entry");
+    } finally {
+      setAnalyzingId(null);
+    }
+  };
+
+  // Parse AI analysis from stored entries
+  useEffect(() => {
+    const parsedAnalyses: Record<string, AnalysisResult> = {};
+    entries.forEach(entry => {
+      if (entry.aiAnalysis) {
+        try {
+          parsedAnalyses[entry.id] = JSON.parse(entry.aiAnalysis);
+        } catch (e) {
+          console.error("Failed to parse AI analysis:", e);
+        }
+      }
+    });
+    setAnalyses(parsedAnalyses);
+  }, [entries]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -185,7 +248,7 @@ export default function Journal() {
         )}
 
         {/* Journal Entry Form */}
-        <div className="bg-gradient-to-br from-[#F5E6D3] to-[#E8D5B7] rounded-3xl p-8 border-2 border-[#D4A574] mb-6 shadow-lg">
+        <div className="card-polished rounded-3xl p-8 mb-6">
           <h2 className="text-xl font-bold text-[#8B6F47] mb-4">
             {editingId !== null ? "Edit Entry" : "New Entry"}
           </h2>
@@ -201,7 +264,7 @@ export default function Journal() {
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-gradient-to-r from-[#D4A574] to-[#C9A876] text-white px-8 py-3 rounded-full font-semibold hover:from-[#C9A876] hover:to-[#D4A574] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {saving ? "Saving..." : editingId !== null ? "Update Entry" : "Save Entry"}
               </button>
@@ -229,34 +292,125 @@ export default function Journal() {
               <p className="text-[#8B6F47] text-lg">No journal entries yet. Start writing to reflect on your thoughts and experiences.</p>
             </div>
           ) : (
-            entries.map((entry) => (
-              <div key={entry.id} className="bg-gradient-to-br from-[#F5E6D3] to-[#E8D5B7] rounded-3xl p-6 border-2 border-[#D4A574] shadow-lg">
-                <div className="flex justify-between items-start mb-3">
-                  <span className="text-sm text-[#8B6F47] font-semibold">{formatDate(entry.createdAt)}</span>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEdit(entry)}
-                      className="p-2 rounded-full bg-[#E8D5B7] hover:bg-[#D4A574] transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-110"
-                      title="Edit entry"
-                    >
-                      <svg className="w-5 h-5 text-[#8B6F47]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => handleDelete(entry.id)}
-                      className="p-2 rounded-full bg-[#E8D5B7] hover:bg-[#D4A574] transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-110"
-                      title="Delete entry"
-                    >
-                      <svg className="w-5 h-5 text-[#8B6F47]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
+            entries.map((entry) => {
+              const analysis = analyses[entry.id];
+              const hasAnalysis = !!analysis;
+
+              return (
+                <div key={entry.id} className="card-polished rounded-3xl p-6 fade-in">
+                  <div className="flex justify-between items-start mb-3">
+                    <span className="text-sm text-[#8B6F47] font-semibold">{formatDate(entry.createdAt)}</span>
+                    <div className="flex gap-2">
+                      {!hasAnalysis && (
+                        <button
+                          onClick={() => handleAnalyze(entry.id)}
+                          disabled={analyzingId === entry.id}
+                          className="p-2 rounded-full bg-gradient-to-r from-[#6B8E23] to-[#7CB342] hover:from-[#7CB342] hover:to-[#6B8E23] text-white transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Analyze with AI"
+                        >
+                          {analyzingId === entry.id ? (
+                            <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                          ) : (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                          )}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleEdit(entry)}
+                        className="p-2 rounded-full bg-[#E8D5B7] hover:bg-[#D4A574] transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-110"
+                        title="Edit entry"
+                      >
+                        <svg className="w-5 h-5 text-[#8B6F47]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => handleDelete(entry.id)}
+                        className="p-2 rounded-full bg-[#E8D5B7] hover:bg-[#D4A574] transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-110"
+                        title="Delete entry"
+                      >
+                        <svg className="w-5 h-5 text-[#8B6F47]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
+                  <p className="text-[#8B6F47] whitespace-pre-wrap mb-4">{entry.content}</p>
+                  
+                  {/* AI Analysis Section */}
+                  {hasAnalysis && (
+                    <div className="mt-6 pt-6 border-t-2 border-[#D4A574]/40 bg-gradient-to-br from-[#F9F5F0] to-[#F5E6D3] rounded-2xl p-6 -mx-2">
+                      <div className="flex items-center gap-2 mb-3">
+                        <svg className="w-5 h-5 text-[#6B8E23]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        <h3 className="text-lg font-bold text-[#8B6F47]">AI Insights</h3>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        {/* Summary */}
+                        <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-[#D4A574]/40 shadow-soft">
+                          <h4 className="font-semibold text-[#8B6F47] mb-2">Summary</h4>
+                          <p className="text-[#8B6F47] text-sm">{analysis.summary}</p>
+                        </div>
+
+                        {/* Patterns */}
+                        {analysis.patterns && analysis.patterns.length > 0 && (
+                          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-[#D4A574]/40 shadow-soft">
+                            <h4 className="font-semibold text-[#8B6F47] mb-2">Patterns</h4>
+                            <ul className="list-disc list-inside space-y-1 text-[#8B6F47] text-sm">
+                              {analysis.patterns.map((pattern, idx) => (
+                                <li key={idx}>{pattern}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Triggers */}
+                        {analysis.triggers && analysis.triggers.length > 0 && (
+                          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-[#D4A574]/40 shadow-soft">
+                            <h4 className="font-semibold text-[#8B6F47] mb-2">Potential Triggers</h4>
+                            <ul className="list-disc list-inside space-y-1 text-[#8B6F47] text-sm">
+                              {analysis.triggers.map((trigger, idx) => (
+                                <li key={idx}>{trigger}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Insights */}
+                        {analysis.insights && analysis.insights.length > 0 && (
+                          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-[#D4A574]/40 shadow-soft">
+                            <h4 className="font-semibold text-[#8B6F47] mb-2">Insights</h4>
+                            <ul className="list-disc list-inside space-y-1 text-[#8B6F47] text-sm">
+                              {analysis.insights.map((insight, idx) => (
+                                <li key={idx}>{insight}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Recommendations */}
+                        {analysis.recommendations && analysis.recommendations.length > 0 && (
+                          <div className="bg-gradient-to-r from-[#E8D5B7] via-[#F0E0C9] to-[#F5E6D3] rounded-xl p-4 border-2 border-[#D4A574] shadow-medium">
+                            <h4 className="font-semibold text-[#8B6F47] mb-2">Recommendations</h4>
+                            <ul className="list-disc list-inside space-y-1 text-[#8B6F47] text-sm">
+                              {analysis.recommendations.map((rec, idx) => (
+                                <li key={idx}>{rec}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <p className="text-[#8B6F47] whitespace-pre-wrap">{entry.content}</p>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

@@ -30,6 +30,13 @@ export async function GET() {
       orderBy: {
         createdAt: "desc",
       },
+      select: {
+        id: true,
+        content: true,
+        aiAnalysis: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
     return NextResponse.json(entries);

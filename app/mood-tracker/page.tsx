@@ -182,7 +182,7 @@ export default function MoodTracker() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Plant Visualization */}
-          <div className="bg-gradient-to-br from-[#F5E6D3] to-[#E8D5B7] rounded-3xl p-6 border-2 border-[#D4A574] flex flex-col relative shadow-lg">
+          <div className="card-polished rounded-3xl p-6 flex flex-col relative">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-[#8B6F47] text-center flex-1">Your Wellness Plant</h2>
             </div>
@@ -360,7 +360,7 @@ export default function MoodTracker() {
                 )}
                 <a
                   href="/journal"
-                  className="inline-block mt-4 bg-gradient-to-r from-[#D4A574] to-[#C9A876] text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:from-[#C9A876] hover:to-[#D4A574] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+                  className="inline-block mt-4 btn-primary text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 transform hover:scale-105"
                 >
                   Go to Journal
                 </a>
@@ -369,7 +369,7 @@ export default function MoodTracker() {
           </div>
 
           {/* Mood Entry Form */}
-          <div className="bg-gradient-to-br from-[#F5E6D3] to-[#E8D5B7] rounded-3xl p-6 border-2 border-[#D4A574] flex flex-col shadow-lg">
+          <div className="card-polished rounded-3xl p-6 flex flex-col">
             <h2 className="text-xl font-bold text-[#8B6F47] mb-4">Log Your Mood</h2>
             
             <form onSubmit={handleSubmit} className="space-y-4 flex-1 flex flex-col">
@@ -411,7 +411,7 @@ export default function MoodTracker() {
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full bg-gradient-to-r from-[#D4A574] to-[#C9A876] text-white px-6 py-3 rounded-full font-semibold hover:from-[#C9A876] hover:to-[#D4A574] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.02] text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full btn-primary text-white px-6 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-[1.02] text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {saving ? "Saving..." : "Save Entry"}
               </button>

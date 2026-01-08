@@ -55,28 +55,9 @@ export default function Reflection() {
               What Went Well
             </h2>
             <div className="bg-[#F9F5F0] rounded-2xl p-6 border-2 border-[#D4A574] min-h-[200px]">
-              <ul className="space-y-3 text-[#8B6F47]">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#6B8E23] font-bold">•</span>
-                  <span>Successfully implemented full-stack authentication with NextAuth v5 and PostgreSQL</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#6B8E23] font-bold">•</span>
-                  <span>Created a beautiful, intuitive UI with consistent design language across all pages</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#6B8E23] font-bold">•</span>
-                  <span>Implemented role-based access control (RBA) for coach/student separation</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#6B8E23] font-bold">•</span>
-                  <span>Built persistent data storage for journal entries and mood tracking</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#6B8E23] font-bold">•</span>
-                  <span>Created a visual plant growth system that motivates users to track their mood</span>
-                </li>
-              </ul>
+              <p className="text-[#8B6F47] leading-relaxed">
+                I got full-stack authentication working with NextAuth v5 and PostgreSQL, which made the whole app feel way more real and secure. I focused a lot on the UI, making sure everything looked clean, intuitive, and consistent so users aren't confused jumping between pages. I also set up role-based access so coaches and students each have their own clear experience. On the backend, I made sure journal entries and mood tracking actually save and stick, which was huge. To keep users motivated, I built a plant growth feature that visually shows progress and makes checking in with your mood feel rewarding instead of like a chore.
+              </p>
             </div>
           </div>
 
@@ -89,24 +70,9 @@ export default function Reflection() {
               What Didn't Go Well
             </h2>
             <div className="bg-[#F9F5F0] rounded-2xl p-6 border-2 border-[#D4A574] min-h-[200px]">
-              <ul className="space-y-3 text-[#8B6F47]">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#D32F2F] font-bold">•</span>
-                  <span>Initial challenges with NextAuth v5 beta API changes (auth() vs getServerSession)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#D32F2F] font-bold">•</span>
-                  <span>Session persistence issues when navigating between pages (fixed by updating all pages to use Nav component)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#D32F2F] font-bold">•</span>
-                  <span>Database connection string format issues with Neon (channel_binding parameter)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#D32F2F] font-bold">•</span>
-                  <span>Prisma query engine conflicts when multiple instances were running</span>
-                </li>
-              </ul>
+              <p className="text-[#8B6F47] leading-relaxed">
+                A lot of the friction came from working with NextAuth v5 while it was still in beta. The API changes, especially switching from getServerSession to auth(), caused confusion early on and slowed me down. I also ran into session persistence issues when moving between pages, which turned out to be a navigation problem that I fixed by refactoring everything to use a shared Nav component. On the backend, Neon gave me a few headaches, including a database connection string issue related to the channel_binding parameter. I also dealt with Prisma query engine conflicts when multiple instances were running, which took some trial and error to fully understand and resolve.
+              </p>
             </div>
           </div>
 
@@ -119,28 +85,9 @@ export default function Reflection() {
               What You Changed During the Project and Why
             </h2>
             <div className="bg-[#F9F5F0] rounded-2xl p-6 border-2 border-[#D4A574] min-h-[200px]">
-              <ul className="space-y-3 text-[#8B6F47]">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#D4A574] font-bold">•</span>
-                  <span><strong>Database:</strong> Switched from SQLite to PostgreSQL (Neon) to support production deployment and better scalability</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#D4A574] font-bold">•</span>
-                  <span><strong>Authentication:</strong> Upgraded to NextAuth v5 beta and adapted to new API patterns (auth() function instead of getServerSession)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#D4A574] font-bold">•</span>
-                  <span><strong>Data Persistence:</strong> Changed from local state to database storage so entries persist across sessions</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#D4A574] font-bold">•</span>
-                  <span><strong>Navigation:</strong> Created shared Nav component to ensure consistent session state across all pages</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#D4A574] font-bold">•</span>
-                  <span><strong>Architecture:</strong> Implemented proper RBA system with middleware and hooks for coach/student separation</span>
-                </li>
-              </ul>
+              <p className="text-[#8B6F47] leading-relaxed">
+                As the project evolved, I made several key changes to support scaling and real-world use. I switched the database from SQLite to PostgreSQL using Neon so the app could actually function in a production environment. I upgraded authentication to NextAuth v5 beta and adjusted my approach to match the new API patterns. I moved away from local state and stored journal entries and mood data in the database so user progress would persist across sessions. To fix session issues and keep things consistent, I created a shared navigation component across all pages. I also reworked the app's architecture to properly support role-based access, using middleware and hooks to clearly separate coach and student experiences.
+              </p>
             </div>
           </div>
 
@@ -153,32 +100,9 @@ export default function Reflection() {
               What You'd Build Next If You Had More Time
             </h2>
             <div className="bg-[#F9F5F0] rounded-2xl p-6 border-2 border-[#D4A574] min-h-[200px]">
-              <ul className="space-y-3 text-[#8B6F47]">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#6B8E23] font-bold">•</span>
-                  <span><strong>AI Analysis:</strong> Implement OpenAI integration to analyze journal entries and provide personalized insights and recommendations</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#6B8E23] font-bold">•</span>
-                  <span><strong>Advanced Analytics:</strong> Add charts and graphs showing mood trends over time, stress patterns, and correlations</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#6B8E23] font-bold">•</span>
-                  <span><strong>Coach Dashboard:</strong> Build a comprehensive dashboard for coaches to view all student progress, journal entries, and mood data</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#6B8E23] font-bold">•</span>
-                  <span><strong>Notifications:</strong> Add reminders for daily mood tracking and weekly reflection prompts</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#6B8E23] font-bold">•</span>
-                  <span><strong>Export Features:</strong> Allow users to export their data as PDF or CSV for personal records</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#6B8E23] font-bold">•</span>
-                  <span><strong>Mobile App:</strong> Create a React Native mobile app for on-the-go mood tracking</span>
-                </li>
-              </ul>
+              <p className="text-[#8B6F47] leading-relaxed">
+                If I had more time, I'd focus on features that help users better understand themselves over time. I'd add analytics with charts and visualizations to show mood trends, stress patterns, and how journaling connects to emotional changes. I'd also introduce notifications and reminders to encourage daily check-ins and weekly reflections. Another big addition would be export tools, letting users download their journal entries and mood data as PDFs or CSVs to keep for themselves or share with a therapist. Long-term, I'd love to build a mobile version using React Native for on-the-go journaling, and expand the AI features to give weekly summaries, spot patterns, and suggest personalized wellness activities.
+              </p>
             </div>
           </div>
         </div>

@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "postinstall": "prisma generate",
     "seed:coaches": "dotenv -e .env.local -- tsx scripts/seed-coaches.ts",
+    "test:openai": "dotenv -e .env.local -- tsx scripts/test-openai.ts",
     "prisma": {
       "seed": "tsx scripts/seed-coaches.ts"
     },
