@@ -1,6 +1,8 @@
 // dotenv-cli loads .env.local before this script runs
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
+import { Pool } from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
 
 // Verify DATABASE_URL is available (dotenv-cli should have loaded it)
 if (!process.env.DATABASE_URL) {
@@ -9,7 +11,10 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
-const prisma = new PrismaClient();
+// Prisma 7 requires an adapter - create a PostgreSQL pool and adapter
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('Seeding coach accounts...');

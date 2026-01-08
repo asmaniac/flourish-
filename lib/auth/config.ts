@@ -47,6 +47,7 @@ export const authOptions: NextAuthConfig = {
   ],
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
     async jwt({ token, user }: { token: any; user?: any }) {
@@ -68,5 +69,6 @@ export const authOptions: NextAuthConfig = {
     signIn: "/login",
   },
   secret: process.env.NEXTAUTH_SECRET,
+  trustHost: true, // Required for NextAuth in Next.js 13+
 };
 

@@ -1,45 +1,147 @@
 'use client';
 
-import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Nav } from "@/components/nav";
+
+interface JournalEntry {
+  id: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function Journal() {
-  const [entries, setEntries] = useState<Array<{content: string, date: string, id: number}>>([]);
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [currentEntry, setCurrentEntry] = useState("");
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Redirect if not logged in
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
+
+  // Fetch entries on load
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetchEntries();
+    }
+  }, [status]);
+
+  const fetchEntries = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/journal");
+      if (!response.ok) {
+        throw new Error("Failed to fetch entries");
+      }
+      const data = await response.json();
+      setEntries(data);
+    } catch (err: any) {
+      setError(err.message || "Failed to load journal entries");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentEntry.trim()) return;
 
-    if (editingId !== null) {
-      // Update existing entry
-      setEntries(entries.map(entry => 
-        entry.id === editingId 
-          ? { ...entry, content: currentEntry, date: new Date().toLocaleDateString() }
-          : entry
-      ));
-      setEditingId(null);
-    } else {
-      // Create new entry
-      const newEntry = {
-        content: currentEntry,
-        date: new Date().toLocaleDateString(),
-        id: Date.now()
-      };
-      setEntries([newEntry, ...entries]);
+    setSaving(true);
+    setError("");
+
+    try {
+      if (editingId !== null) {
+        // Update existing entry
+        const response = await fetch(`/api/journal/${editingId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: currentEntry }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to update entry");
+        }
+
+        const updatedEntry = await response.json();
+        setEntries(entries.map(entry => 
+          entry.id === editingId ? updatedEntry : entry
+        ));
+        setEditingId(null);
+      } else {
+        // Create new entry
+        const response = await fetch("/api/journal", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: currentEntry }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to save entry");
+        }
+
+        const newEntry = await response.json();
+        setEntries([newEntry, ...entries]);
+      }
+      setCurrentEntry("");
+    } catch (err: any) {
+      setError(err.message || "Failed to save entry");
+    } finally {
+      setSaving(false);
     }
-    setCurrentEntry("");
   };
 
-  const handleEdit = (entry: {content: string, date: string, id: number}) => {
+  const handleEdit = (entry: JournalEntry) => {
     setCurrentEntry(entry.content);
     setEditingId(entry.id);
   };
 
-  const handleDelete = (id: number) => {
-    setEntries(entries.filter(entry => entry.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this entry?")) return;
+
+    try {
+      const response = await fetch(`/api/journal/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete entry");
+      }
+
+      setEntries(entries.filter(entry => entry.id !== id));
+    } catch (err: any) {
+      setError(err.message || "Failed to delete entry");
+    }
   };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  if (status === "loading" || loading) {
+    return (
+      <div className="min-h-screen bg-[#F9F5F0] flex items-center justify-center">
+        <div className="text-[#8B6F47] text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return null; // Will redirect
+  }
 
   return (
     <div className="min-h-screen bg-[#F9F5F0] relative overflow-hidden">
@@ -71,32 +173,16 @@ export default function Journal() {
         </div>
       </div>
 
-      {/* Navigation Bar */}
-      <nav className="bg-[#F5E6D3] border-b border-[#D4A574] relative z-10">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <Link href="/" className="text-3xl font-bold text-[#8B6F47]">FLOURISH</Link>
-          <div className="flex items-center gap-8">
-            <Link href="/about" className="text-[#8B6F47] hover:text-[#6B5435] transition-colors">
-              About
-            </Link>
-            <Link href="/features" className="text-[#8B6F47] hover:text-[#6B5435] transition-colors">
-              Features
-            </Link>
-            <Link href="/product" className="text-[#8B6F47] hover:text-[#6B5435] transition-colors">
-              Product
-            </Link>
-            <Link 
-              href="/login" 
-              className="bg-[#E8D5B7] text-[#8B6F47] px-6 py-2 rounded-full hover:bg-[#D4A574] transition-colors"
-            >
-              Login
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Nav />
 
       <div className="max-w-4xl mx-auto px-6 py-6 relative z-10">
         <h1 className="text-3xl font-bold text-[#8B6F47] mb-6">Journal</h1>
+
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
+            {error}
+          </div>
+        )}
 
         {/* Journal Entry Form */}
         <div className="bg-gradient-to-br from-[#F5E6D3] to-[#E8D5B7] rounded-3xl p-8 border-2 border-[#D4A574] mb-6 shadow-lg">
@@ -109,13 +195,15 @@ export default function Journal() {
               onChange={(e) => setCurrentEntry(e.target.value)}
               placeholder="What's on your mind? Reflect on your day, your thoughts, or anything you'd like to remember..."
               className="w-full h-40 px-4 py-3 bg-[#F9F5F0] border border-[#D4A574] rounded-lg text-[#8B6F47] placeholder-[#8B6F47]/50 focus:outline-none focus:ring-2 focus:ring-[#D4A574] resize-none mb-4"
+              disabled={saving}
             />
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="bg-gradient-to-r from-[#D4A574] to-[#C9A876] text-white px-8 py-3 rounded-full font-semibold hover:from-[#C9A876] hover:to-[#D4A574] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+                disabled={saving}
+                className="bg-gradient-to-r from-[#D4A574] to-[#C9A876] text-white px-8 py-3 rounded-full font-semibold hover:from-[#C9A876] hover:to-[#D4A574] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {editingId !== null ? "Update Entry" : "Save Entry"}
+                {saving ? "Saving..." : editingId !== null ? "Update Entry" : "Save Entry"}
               </button>
               {editingId !== null && (
                 <button
@@ -124,7 +212,8 @@ export default function Journal() {
                     setEditingId(null);
                     setCurrentEntry("");
                   }}
-                  className="bg-[#E8D5B7] text-[#8B6F47] px-8 py-3 rounded-full font-semibold hover:bg-[#D4A574] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+                  disabled={saving}
+                  className="bg-[#E8D5B7] text-[#8B6F47] px-8 py-3 rounded-full font-semibold hover:bg-[#D4A574] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -143,7 +232,7 @@ export default function Journal() {
             entries.map((entry) => (
               <div key={entry.id} className="bg-gradient-to-br from-[#F5E6D3] to-[#E8D5B7] rounded-3xl p-6 border-2 border-[#D4A574] shadow-lg">
                 <div className="flex justify-between items-start mb-3">
-                  <span className="text-sm text-[#8B6F47] font-semibold">{entry.date}</span>
+                  <span className="text-sm text-[#8B6F47] font-semibold">{formatDate(entry.createdAt)}</span>
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(entry)}
@@ -174,5 +263,3 @@ export default function Journal() {
     </div>
   );
 }
-
-

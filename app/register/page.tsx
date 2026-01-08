@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Nav } from "@/components/nav";
 
 export default function Register() {
   const router = useRouter();
@@ -72,29 +73,7 @@ export default function Register() {
         </div>
       </div>
 
-      {/* Navigation Bar */}
-      <nav className="bg-[#F5E6D3] border-b border-[#D4A574] relative z-10">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <Link href="/" className="text-3xl font-bold text-[#8B6F47]">FLOURISH</Link>
-          <div className="flex items-center gap-8">
-            <Link href="/about" className="text-[#8B6F47] hover:text-[#6B5435] transition-colors">
-              About
-            </Link>
-            <Link href="/features" className="text-[#8B6F47] hover:text-[#6B5435] transition-colors">
-              Features
-            </Link>
-            <Link href="/product" className="text-[#8B6F47] hover:text-[#6B5435] transition-colors">
-              Product
-            </Link>
-            <Link 
-              href="/login" 
-              className="bg-[#E8D5B7] text-[#8B6F47] px-6 py-2 rounded-full hover:bg-[#D4A574] transition-colors"
-            >
-              Login
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Nav />
 
       <div className="max-w-md mx-auto px-6 py-12 relative z-10">
         <div className="bg-gradient-to-br from-[#F5E6D3] to-[#E8D5B7] rounded-3xl p-8 border-2 border-[#D4A574] shadow-lg">

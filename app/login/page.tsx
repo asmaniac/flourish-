@@ -1,20 +1,22 @@
 'use client';
 
-import Link from "next/link";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Nav } from "@/components/nav";
 
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess(false);
     setLoading(true);
 
     try {
@@ -27,8 +29,12 @@ export default function Login() {
       if (result?.error) {
         setError(result.error);
       } else {
-        router.push("/");
-        router.refresh();
+        setSuccess(true);
+        // Redirect after a brief success message
+        setTimeout(() => {
+          router.push("/journal");
+          router.refresh();
+        }, 1000);
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
@@ -67,33 +73,17 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Navigation Bar */}
-      <nav className="bg-[#F5E6D3] border-b border-[#D4A574] relative z-10">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <Link href="/" className="text-3xl font-bold text-[#8B6F47]">FLOURISH</Link>
-          <div className="flex items-center gap-8">
-            <Link href="/about" className="text-[#8B6F47] hover:text-[#6B5435] transition-colors">
-              About
-            </Link>
-            <Link href="/features" className="text-[#8B6F47] hover:text-[#6B5435] transition-colors">
-              Features
-            </Link>
-            <Link href="/product" className="text-[#8B6F47] hover:text-[#6B5435] transition-colors">
-              Product
-            </Link>
-            <Link 
-              href="/login" 
-              className="bg-[#E8D5B7] text-[#8B6F47] px-6 py-2 rounded-full hover:bg-[#D4A574] transition-colors font-semibold"
-            >
-              Login
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Nav />
 
       <div className="max-w-md mx-auto px-6 py-12 relative z-10">
         <div className="bg-gradient-to-br from-[#F5E6D3] to-[#E8D5B7] rounded-3xl p-8 border-2 border-[#D4A574] shadow-lg">
           <h1 className="text-3xl font-bold text-[#8B6F47] mb-6 text-center">Login</h1>
+          
+          {success && (
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
+              ✓ Login successful! Redirecting...
+            </div>
+          )}
           
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
@@ -144,9 +134,9 @@ export default function Login() {
           <div className="mt-6 text-center">
             <p className="text-[#8B6F47]">
               Don't have an account?{" "}
-              <Link href="/register" className="text-[#D4A574] hover:text-[#8B6F47] font-semibold underline">
+              <a href="/register" className="text-[#D4A574] hover:text-[#8B6F47] font-semibold underline">
                 Sign up
-              </Link>
+              </a>
             </p>
           </div>
         </div>

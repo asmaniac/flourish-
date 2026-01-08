@@ -1,37 +1,145 @@
 'use client';
 
-import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Nav } from "@/components/nav";
+
+interface MoodEntry {
+  id: string;
+  mood: number;
+  stress: number | null;
+  notes: string | null;
+  createdAt: string;
+}
 
 export default function MoodTracker() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [mood, setMood] = useState(5);
+  const [stress, setStress] = useState<number | null>(null);
   const [notes, setNotes] = useState("");
-  const [entries, setEntries] = useState<Array<{mood: number, notes: string, date: string}>>([]);
+  const [entries, setEntries] = useState<MoodEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  // Redirect if not logged in
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
+
+  // Fetch entries on load
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetchEntries();
+    }
+  }, [status]);
+
+  const fetchEntries = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const response = await fetch("/api/mood");
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error("API Error fetching entries:", data);
+        throw new Error(data.error || "Failed to fetch entries");
+      }
+      
+      setEntries(data);
+    } catch (err: any) {
+      console.error("Error fetching mood entries:", err);
+      setError(err.message || "Failed to load mood entries");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Calculate plant growth based on average mood (0-10 scale, plant grows 0-100%)
-  // Limit max height to 200px to save space
   const averageMood = entries.length > 0 
     ? entries.reduce((sum, e) => sum + e.mood, 0) / entries.length 
     : 5;
   const plantGrowth = Math.min(100, (averageMood / 10) * 100);
-  const maxPlantHeight = 200; // Limit plant height
+  const maxPlantHeight = 200;
   const plantHeight = (plantGrowth / 100) * maxPlantHeight;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newEntry = {
-      mood,
-      notes,
-      date: new Date().toLocaleDateString()
-    };
-    setEntries([...entries, newEntry]);
-    setMood(5);
-    setNotes("");
+    setSaving(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/mood", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mood,
+          stress: stress || null,
+          notes: notes.trim() || null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("API Error:", data);
+        throw new Error(data.error || "Failed to save mood entry");
+      }
+
+      const newEntry = data;
+      setEntries([newEntry, ...entries]);
+      setMood(5);
+      setStress(null);
+      setNotes("");
+      setError(""); // Clear any previous errors
+    } catch (err: any) {
+      console.error("Error saving mood entry:", err);
+      setError(err.message || "Failed to save mood entry");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleRefresh = () => {
-    setEntries([]);
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this entry?")) return;
+
+    try {
+      const response = await fetch(`/api/mood/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete entry");
+      }
+
+      setEntries(entries.filter(entry => entry.id !== id));
+    } catch (err: any) {
+      setError(err.message || "Failed to delete entry");
+    }
   };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  if (status === "loading" || loading) {
+    return (
+      <div className="min-h-screen bg-[#F9F5F0] flex items-center justify-center">
+        <div className="text-[#8B6F47] text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return null; // Will redirect
+  }
 
   return (
     <div className="min-h-screen bg-[#F9F5F0] relative overflow-hidden">
@@ -63,51 +171,24 @@ export default function MoodTracker() {
         </div>
       </div>
 
-      {/* Navigation Bar */}
-      <nav className="bg-[#F5E6D3] border-b border-[#D4A574] relative z-10">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <Link href="/" className="text-3xl font-bold text-[#8B6F47]">FLOURISH</Link>
-          <div className="flex items-center gap-8">
-            <Link href="/about" className="text-[#8B6F47] hover:text-[#6B5435] transition-colors">
-              About
-            </Link>
-            <Link href="/features" className="text-[#8B6F47] hover:text-[#6B5435] transition-colors">
-              Features
-            </Link>
-            <Link href="/product" className="text-[#8B6F47] hover:text-[#6B5435] transition-colors">
-              Product
-            </Link>
-            <Link 
-              href="/login" 
-              className="bg-[#E8D5B7] text-[#8B6F47] px-6 py-2 rounded-full hover:bg-[#D4A574] transition-colors"
-            >
-              Login
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Nav />
 
       <div className="max-w-7xl mx-auto px-6 py-6 relative z-10">
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
+            {error}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Plant Visualization */}
           <div className="bg-gradient-to-br from-[#F5E6D3] to-[#E8D5B7] rounded-3xl p-6 border-2 border-[#D4A574] flex flex-col relative shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-[#8B6F47] text-center flex-1">Your Wellness Plant</h2>
-              {entries.length > 0 && (
-                <button
-                  onClick={handleRefresh}
-                  className="ml-2 p-1.5 rounded-full bg-[#E8D5B7] hover:bg-[#D4A574] transition-colors"
-                  title="Reset plant"
-                >
-                  <svg className="w-4 h-4 text-[#8B6F47]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                </button>
-              )}
             </div>
             
             <div className="flex-1 flex flex-col items-center justify-center relative">
-              {/* Plant Container - fills the box */}
+              {/* Plant Container */}
               <div className="relative w-full flex flex-col items-center justify-end" style={{ height: '280px' }}>
                 {/* Pot */}
                 <div className="relative z-10" style={{ width: '100px', height: '80px' }}>
@@ -131,7 +212,7 @@ export default function MoodTracker() {
                   </svg>
                 </div>
                 
-                {/* Plant - grows based on mood, limited height */}
+                {/* Plant - grows based on mood */}
                 <div 
                   className="absolute bottom-16 left-1/2 transform -translate-x-1/2"
                   style={{ 
@@ -277,12 +358,12 @@ export default function MoodTracker() {
                     Avg mood: {averageMood.toFixed(1)}/10
                   </p>
                 )}
-                <Link
+                <a
                   href="/journal"
                   className="inline-block mt-4 bg-gradient-to-r from-[#D4A574] to-[#C9A876] text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:from-[#C9A876] hover:to-[#D4A574] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
                 >
                   Go to Journal
-                </Link>
+                </a>
               </div>
             </div>
           </div>
@@ -304,6 +385,7 @@ export default function MoodTracker() {
                   value={mood}
                   onChange={(e) => setMood(Number(e.target.value))}
                   className="w-full h-2 bg-[#E8D5B7] rounded-lg appearance-none cursor-pointer accent-[#D4A574]"
+                  disabled={saving}
                 />
                 <div className="flex justify-between text-xs text-[#8B6F47] mt-1">
                   <span>Low</span>
@@ -321,15 +403,17 @@ export default function MoodTracker() {
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="How was your day? What's on your mind?"
                   className="flex-1 min-h-[80px] px-3 py-2 bg-[#F9F5F0] border border-[#D4A574] rounded-lg text-sm text-[#8B6F47] placeholder-[#8B6F47]/50 focus:outline-none focus:ring-2 focus:ring-[#D4A574] resize-none"
+                  disabled={saving}
                 />
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-[#D4A574] to-[#C9A876] text-white px-6 py-3 rounded-full font-semibold hover:from-[#C9A876] hover:to-[#D4A574] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.02] text-sm"
+                disabled={saving}
+                className="w-full bg-gradient-to-r from-[#D4A574] to-[#C9A876] text-white px-6 py-3 rounded-full font-semibold hover:from-[#C9A876] hover:to-[#D4A574] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.02] text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Save Entry
+                {saving ? "Saving..." : "Save Entry"}
               </button>
             </form>
 
@@ -337,12 +421,23 @@ export default function MoodTracker() {
             {entries.length > 0 && (
               <div className="mt-4">
                 <h3 className="text-lg font-bold text-[#8B6F47] mb-3">Recent Entries</h3>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {entries.slice().reverse().slice(0, 3).map((entry, index) => (
-                    <div key={index} className="bg-[#F9F5F0] rounded-xl p-3 border-2 border-[#D4A574] shadow-sm">
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {entries.slice(0, 5).map((entry) => (
+                    <div key={entry.id} className="bg-[#F9F5F0] rounded-xl p-3 border-2 border-[#D4A574] shadow-sm">
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs text-[#8B6F47] font-semibold">{entry.date}</span>
-                        <span className="text-xs text-[#8B6F47]">Mood: {entry.mood}/10</span>
+                        <span className="text-xs text-[#8B6F47] font-semibold">{formatDate(entry.createdAt)}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-[#8B6F47]">Mood: {entry.mood}/10</span>
+                          <button
+                            onClick={() => handleDelete(entry.id)}
+                            className="p-1 rounded-full bg-red-100 hover:bg-red-200 transition-colors"
+                            title="Delete entry"
+                          >
+                            <svg className="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                       {entry.notes && (
                         <p className="text-xs text-[#8B6F47] mt-1 line-clamp-2">{entry.notes}</p>
