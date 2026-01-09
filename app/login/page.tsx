@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Nav } from "@/components/nav";
 
 export default function Login() {
@@ -134,9 +135,9 @@ export default function Login() {
           <div className="mt-6 text-center">
             <p className="text-[#8B6F47]">
               Don't have an account?{" "}
-              <a href="/register" className="text-[#D4A574] hover:text-[#8B6F47] font-semibold underline">
+              <Link href="/register" className="text-[#D4A574] hover:text-[#8B6F47] font-semibold underline">
                 Sign up
-              </a>
+              </Link>
             </p>
           </div>
         </div>
